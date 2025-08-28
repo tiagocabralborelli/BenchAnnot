@@ -1,19 +1,30 @@
 # Large data files
 *.gz
 *.zip
+*.fna
+*.fasta
+*.fastq
 
 # Heavy results
 results/
 *.out
 *.log
+*.tsv
+*.csv
 
 # Environments
 .env
 .venv/
+env/
+
+# Python/ R cache
 __pycache__/
 *.pyc
 *.Rhistory
+*.RData
+*.Rproj.user
 
 # Nextflow
 work/
 .nextflow
+.nextflow.log

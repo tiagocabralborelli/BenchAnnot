@@ -1,11 +1,19 @@
-# BenchAnnot
+# Functional Annotation Pipeline
+
+This pipeline is designed to test and compare multiple functional annotation tools
 
 ## Requirements
 
-- Nextflow
-- Docker
+- [Nextflow](https://www.nextflow.io/)
+- [Docker](https://www.docker.com/)
 - Input genome files in FASTA format (`.fna`) placed in the `data/` directory
 
+## Usage
+Place your genome files in the `data/` folder.
+Run the pipeline with:
+    ```bash
+    nextflow run main.nf
+The pipeline will automatically execute all modules defined in the workflow.
 
 ## Output
 
@@ -13,4 +21,8 @@
 
 ## Module
 
-- The Prokka process is defined in `modules/prokka.nf` and automatically handles each input genome.
+- Prokka: defined in `modules/prokka.nf` and automatically handles each input genome.
+
+# Notes
+- Pipeline for reproducibility and scalability using Docker containers.
+- All intermediate files are stored in the `work/` directory and final results are organized under  `results/`.
