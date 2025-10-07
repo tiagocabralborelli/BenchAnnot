@@ -15,6 +15,12 @@ process BAKTA {
 
     script: 
     """
-    bakta --db ${bakta_db_dir} --output ${fasta_file.baseName}_bakta --prefix ${fasta_file.baseName} ${fasta_file} -t  ${task.cpus}
+    bakta \
+    --db ${bakta_db_dir} \
+    --output ${fasta_file.baseName}_bakta \
+    --prefix ${fasta_file.baseName} ${fasta_file} \
+    -t  ${task.cpus}\
+    --skip-plot \
+    --compliant
     """
 }
