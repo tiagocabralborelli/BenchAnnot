@@ -1,20 +1,15 @@
-# Large data files
-*.gz
-*.zip
-databases/
-
-# Heavy results
 results/
 *.out
 *.log
 
-# Environments
 .env
 .venv/
 __pycache__/
 *.pyc
-*.Rhistory
 
 # Nextflow
 work/
 .nextflow
+
+sandbox/
+bacillus_analysis/*.gff
