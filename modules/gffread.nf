@@ -13,29 +13,29 @@ process GFFREAD {
   """
   set -euo pipefail
 
-  # remover transcritos/linhas com trans-splicing e strand indefinido ('?'), mantendo cabeçalhos (#), e qualquer linha com strand +/-
+  # Filter out trans-splicing entries and undefined strand ('?') while preserving headers.
   awk 'BEGIN{FS=OFS="\\t"}
        /^#/ {print; next}
        \$7=="?" {next}
        \$9 ~ /exception=trans-splicing/ {next}
        {print}' "${anno}" > "${sample_id}.filtered.gff"
 
-  # Métrica simples do filtro
+  # Emit a simple filtering summary for traceability.
   total=\$(grep -vc '^#' "${anno}" || true)
   kept=\$(grep -vc '^#' "${sample_id}.filtered.gff" || true)
   removed=\$(( total - kept ))
   echo "[GFFREAD/${sample_id}] total=\$total kept=\$kept removed=\$removed" >&2
 
-  # 2) Se não sobrou nada útil
+  # Fail early if the filter removed all entries.
   if [ "\$kept" -le 0 ]; then
     echo "[GFFREAD/${sample_id}] No usable entries after filtering (all were trans-splicing or strand '?')." >&2
     exit 2
   fi
-
-  # 3) Execução tolerante do gffread para extrair proteína
-  gffread "${sample_id}.filtered.gff" \
+  
+  # Run gffread to extract protein sequences from the filtered GFF.
+  gffread -F -S -C -J \
+    "${sample_id}.filtered.gff" \
     -g "${fasta}" \
     -y "${sample_id}.faa" \
-    --force-exons --gene2exon --t-adopt -E
   """
 }
