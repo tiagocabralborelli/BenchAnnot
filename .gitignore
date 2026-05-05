@@ -4,7 +4,7 @@ results/
 
 .env
 .venv/
-__pycache__/
+__pycache__
 *.pyc
 
 # Nextflow
@@ -12,4 +12,4 @@ work/
 .nextflow
 
 sandbox/
-bacillus_analysis/*.gff
+prokaryotic_scripts/*_data
