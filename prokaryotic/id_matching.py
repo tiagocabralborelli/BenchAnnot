@@ -5,13 +5,42 @@ import time
 import requests
 import pandas as pd
 import numpy as np
+import gff3_parser
 from Bio import SeqIO
-from typing import List
+from typing import List, Dict
 
 
 def clean_id(val: str) -> str:
     """Strip generic prefixes from IDs to ensure clean API mapping."""
     return str(val).replace("cds-", "").strip() if pd.notna(val) else np.nan
+
+
+def get_best_mapping(candidates, mapping_dict):
+    """Return the first mapped value from a list of candidates, or NaN."""
+    if not isinstance(candidates, list):
+        return np.nan
+    for cand in candidates:
+        if cand in mapping_dict:
+            return mapping_dict[cand]
+    return np.nan
+
+
+def parse_eggnog_candidates(eggnog_gff_path: str) -> Dict[str, List[str]]:
+    """Parse eggNOG GFF and return {orf_id: [candidate_ids]} mapping."""
+    eggnog_df = gff3_parser.parse_gff3(eggnog_gff_path, parse_attributes=True, verbose=False)
+    eggnog_df["orf_id"] = eggnog_df.apply(
+        lambda row: f"{row['Start']}_{row['End']}_{row['Strand']}", axis=1
+    )
+
+    eggnog_ids_dict = {}
+    for _, row in eggnog_df.iterrows():
+        target = row.get("em_target", np.nan)
+        pref = row.get("em_Preferred_name", np.nan)
+        eggnog_ids_dict[row["orf_id"]] = [
+            x for x in [target, pref] if pd.notna(x) and str(x).strip() != ""
+        ]
+
+    return eggnog_ids_dict
 
 
 def parse_gbk_identifiers(filepath: str, tool: str) -> pd.DataFrame:
