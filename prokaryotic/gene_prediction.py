@@ -201,9 +201,13 @@ def plot_concordance_upset(
 
 
 def export_concordant_cds(
-    all_gffs_df: pd.DataFrame, tools: List[str], ref_source: str, output_path: str
+    all_gffs_df: pd.DataFrame,
+    tools: List[str],
+    ref_source: str,
+    output_path: str,
+    concordant_only: bool = True,
 ) -> pd.DataFrame:
-    """Merge product annotations from all tools into a single reference DataFrame and export to CSV.
+    """Export CDS with product annotations for all tools and reference.
 
     Parameters
     ----------
@@ -215,22 +219,38 @@ def export_concordant_cds(
         The source name of the ground truth reference annotations.
     output_path : str
         File path where the resulting CSV will be saved.
+    concordant_only : bool, optional
+        If True, only export CDS present in all tools and the reference.
+        If False, export all reference CDS with left-joined tool annotations.
+        By default True.
 
     Returns
     -------
     pd.DataFrame
-        The merged DataFrame containing the concordant CDS data.
+        The merged DataFrame containing the CDS data with product annotations.
     """
     reference_df = all_gffs_df[all_gffs_df["Source"] == ref_source]
-    tp_df = reference_df[["orf_id", "Start", "End", "Strand"]].copy()
+
+    if concordant_only:
+        ref_orfs = set(reference_df["orf_id"])
+        concordant_orfs = ref_orfs
+        for tool in tools:
+            tool_orfs = set(all_gffs_df[all_gffs_df["Source"] == tool]["orf_id"])
+            concordant_orfs = concordant_orfs.intersection(tool_orfs)
+
+        tp_df = reference_df[reference_df["orf_id"].isin(concordant_orfs)][
+            ["orf_id", "Start", "End", "Strand"]
+        ].copy()
+    else:
+        tp_df = reference_df[["orf_id", "Start", "End", "Strand"]].copy()
 
     for tool in tools:
-        tool_sub = all_gffs_df[all_gffs_df["Source"] == tool][["orf_id", "product"]]
-        tool_sub = tool_sub.rename(columns={"product": f"product_{tool}"})
+        tool_sub = all_gffs_df[all_gffs_df["Source"] == tool][["orf_id", "product", "gene"]]
+        tool_sub = tool_sub.rename(columns={"product": f"product_{tool}", "gene": f"gene_{tool}"})
         tp_df = pd.merge(tp_df, tool_sub, on="orf_id", how="left")
 
-    ref_sub = reference_df[["orf_id", "product"]].rename(
-        columns={"product": f"product_{ref_source}"}
+    ref_sub = reference_df[["orf_id", "product", "gene"]].rename(
+        columns={"product": f"product_{ref_source}", "gene": f"gene_{ref_source}"}
     )
     tp_df = pd.merge(tp_df, ref_sub, on="orf_id", how="left")
 
