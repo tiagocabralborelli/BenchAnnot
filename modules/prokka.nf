@@ -2,7 +2,7 @@
 
 process PROKKA {
     label 'prokka'
-    container 'staphb/prokka:1.14.6'
+    container "https://depot.galaxyproject.org/singularity/prokka%3A1.14.6--pl5321hdfd78af_5"
     publishDir "results/prokka", mode: 'copy' 
 
     input:
@@ -13,7 +13,10 @@ process PROKKA {
 
     script: 
     """
-    prokka --outdir ${fasta_file.baseName}_prokka --prefix ${fasta_file.baseName} ${fasta_file}
+    prokka \
+    --outdir ${fasta_file.baseName}_prokka \
+    --prefix ${fasta_file.baseName} ${fasta_file} \
+    --cpus ${task.cpus} \
+    --compliant
     """
 }
-

@@ -2,9 +2,8 @@
 
 process EGGNOG {
     label "eggnog_mapper_v2"
-    container "brunoholiva/eggnog_v2:latest"
+    container "brunoholiva/eggnog_v2:2.1.13-sse41"
     publishDir "results/eggnog", mode: "copy"
-    containerOptions '-u $(id -u):$(id -g)'
 
     input:
     path fasta_file
@@ -15,15 +14,19 @@ process EGGNOG {
 
     script:
     """
+    export MAMBA_SKIP_ACTIVATE=""
+    source /usr/local/bin/_activate_current_env.sh
     mkdir ${fasta_file.baseName}_eggnog
     emapper.py \
     --itype genome \
     --genepred prodigal \
+    --decorate_gff yes \
     -i ${fasta_file} \
     -o ${fasta_file.baseName} \
     --data_dir ${eggnog_db_dir} \
     -m mmseqs \
-    --cpu 0 \
-    --output_dir ${fasta_file.baseName}_eggnog
+    --cpu ${task.cpus} \
+    --output_dir ${fasta_file.baseName}_eggnog \
+    --dbmem
     """
 }
